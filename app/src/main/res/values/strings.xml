@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">JobInterview</string>
+    <string name="action_about">O aplikaci</string>
+    <string name="title_activity_detail">Movie Detail</string>
+</resources>
