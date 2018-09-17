@@ -9,6 +9,7 @@ import android.view.ViewGroup
 
 import com.a24i.jobinterview.R
 import com.a24i.jobinterview.databinding.FragmentDetailBinding
+import com.a24i.jobinterview.entity.Movie
 import com.a24i.jobinterview.viewmodel.DetailFragmentViewModel
 
 class DetailFragment : BaseFragment() {
@@ -16,9 +17,22 @@ class DetailFragment : BaseFragment() {
     private lateinit var mViewModel: DetailFragmentViewModel
     private lateinit var mBinding: FragmentDetailBinding
 
+    companion object {
+        const val KEY_MOVIE = "movie_key"
+
+        fun newInstance(movie: Movie?): DetailFragment {
+            val fragment =  DetailFragment()
+            val args = Bundle()
+            args.putParcelable(KEY_MOVIE, movie)
+            fragment.arguments = args
+            return fragment
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mViewModel = ViewModelProviders.of(this).get(DetailFragmentViewModel::class.java)
+        mViewModel.movie = arguments?.getParcelable(KEY_MOVIE)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,

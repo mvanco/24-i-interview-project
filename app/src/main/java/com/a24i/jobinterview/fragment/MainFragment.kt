@@ -26,10 +26,15 @@ class MainFragment : BaseFragment() {
 
     interface OnFragmentInteractionListener: ChangedMovieAdapter.OnItemClickListener
 
+    companion object {
+        fun newInstance(): MainFragment {
+            return MainFragment()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mViewModel = ViewModelProviders.of(this).get(MainFragmentViewModel::class.java)
-        mViewModel.getItemClickedLiveData().observe(this, Observer { Toast.makeText(activity, "jajko", Toast.LENGTH_LONG).show() })
         lifecycle.addObserver(mViewModel)
     }
 

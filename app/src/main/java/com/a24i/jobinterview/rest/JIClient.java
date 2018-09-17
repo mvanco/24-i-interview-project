@@ -7,6 +7,7 @@ import com.a24i.jobinterview.JobInterviewConfig;
 import com.a24i.jobinterview.repository.TheMovieDbRepository;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.experimental.CoroutineCallAdapterFactory;
 
 import java.util.concurrent.TimeUnit;
 
@@ -50,7 +51,7 @@ public class JIClient
         builder.baseUrl(JobInterviewConfig.REST_BASE_URL);
         builder.client(buildClient());
         builder.addConverterFactory(createConverterFactory());
-        builder.addCallAdapterFactory(createCallAdapterFactory());
+        builder.addCallAdapterFactory(CoroutineCallAdapterFactory.create());
         return builder.build();
     }
 

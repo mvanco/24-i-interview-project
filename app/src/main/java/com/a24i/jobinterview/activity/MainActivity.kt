@@ -21,6 +21,10 @@ class MainActivity : BaseActivity(), MainFragment.OnFragmentInteractionListener 
     private lateinit var mViewModel: MainActivityViewModel
     private lateinit var mBinding: ActivityMainBinding  // So far only for future extensibility.
 
+    companion object {
+        const val TAG_MAIN_FRAGMENT = "main_fragment_tag"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mViewModel = ViewModelProviders.of(this).get(MainActivityViewModel::class.java)
@@ -28,20 +32,7 @@ class MainActivity : BaseActivity(), MainFragment.OnFragmentInteractionListener 
         mBinding.viewModel = mViewModel
 
         setSupportActionBar(mBinding.toolbar)
-
-
-
-        TheMovieDbRepository.getChangedMovies("2018-09-10", "2018-09-16", 1).subscribe {
-            for (item: ChangedMovie in it) {
-                Log.d("super", item.id.toString())
-            }
-        }
-
-//        for (i in 4992L..6000L) {
-            TheMovieDbRepository.getMovie(4992L).subscribe {
-                Log.d("super2", it.poster_path)
-//            }
-        }
+        supportFragmentManager.beginTransaction().add(R.id.fragment_container, MainFragment.newInstance(), TAG_MAIN_FRAGMENT).commit()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

@@ -1,3 +1,7 @@
 package com.a24i.jobinterview.viewmodel
 
-class DetailFragmentViewModel : BaseFragmentViewModel()
+import com.a24i.jobinterview.entity.Movie
+
+class DetailFragmentViewModel : BaseFragmentViewModel() {
+    var movie: Movie? = null
+}
