@@ -5,6 +5,7 @@
 	xmlns:tools="http://schemas.android.com/tools">
 
 	<data>
+
 		<variable
 			name="viewModel"
 			type="com.a24i.jobinterview.viewmodel.MainFragmentViewModel"/>
@@ -15,21 +16,49 @@
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		tools:context=".fragment.MainFragment"
-		tools:showIn="@layout/activity_main"
-		android:background="#264193">
+		tools:showIn="@layout/activity_main">
+
+		<TextView
+			android:id="@+id/in_last"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="32dp"
+			android:layout_marginBottom="32dp"
+			android:layout_marginLeft="32dp"
+			android:layout_marginStart="32dp"
+			android:text="In last"
+			android:textSize="32sp"
+			app:layout_constraintLeft_toLeftOf="parent"
+			app:layout_constraintTop_toTopOf="parent"/>
 
 		<EditText
 			android:id="@+id/last_days"
-			android:layout_width="0dp"
+			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:layout_marginLeft="8dp"
+			android:layout_marginStart="8dp"
 			android:inputType="numberDecimal"
-			app:layout_constraintLeft_toLeftOf="parent"
-			app:layout_constraintRight_toRightOf="parent"
-			app:layout_constraintTop_toTopOf="parent"/>
+			android:ems="1"
+			android:maxLength="1"
+			android:textSize="32sp"
+			app:layout_constraintBaseline_toBaselineOf="@id/in_last"
+			app:layout_constraintLeft_toRightOf="@id/in_last"/>
+
+		<TextView
+			android:id="@+id/days"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="8dp"
+			android:layout_marginStart="8dp"
+			android:text="days"
+			android:textSize="32sp"
+			app:layout_constraintBaseline_toBaselineOf="@id/in_last"
+			app:layout_constraintLeft_toRightOf="@id/last_days"/>
+
 
 		<android.support.v7.widget.RecyclerView
 			android:id="@+id/movies"
-			android:layout_width="0dp"
+			android:layout_width="wrap_content"
 			android:layout_height="0dp"
 			app:layout_constraintBottom_toBottomOf="parent"
 			app:layout_constraintLeft_toLeftOf="parent"
