@@ -1,11 +1,9 @@
 package com.a24i.jobinterview.viewmodel
 
 import android.arch.lifecycle.Lifecycle
-import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.OnLifecycleEvent
 import android.databinding.ObservableField
-import android.os.Handler
 import android.util.Log
 import com.a24i.jobinterview.JobInterviewConfig
 import com.a24i.jobinterview.api.ChangedMoviesApi
@@ -13,12 +11,14 @@ import com.a24i.jobinterview.api.MovieApi
 import com.a24i.jobinterview.entity.Movie
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.Main
-import kotlinx.coroutines.experimental.android.UI
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainFragmentViewModel : BaseFragmentViewModel() {
 
     val mOnMovieListChanged: MutableLiveData<List<Movie>> = MutableLiveData()
-    private val mLastDays = ObservableField(3)
+    val mLastDays = ObservableField("3")
     private var reloadMoviesJob: Job? = null
     private var changedMovies: ChangedMoviesApi? = null
     private var mStartInd: Int = 0
@@ -40,34 +40,15 @@ class MainFragmentViewModel : BaseFragmentViewModel() {
                 loadNextMovies()
             }
         }
-
-
-//        reloadMovies("2018-09-10", "2018-09-17", 1, 0, 35)
-//        Handler().postDelayed({
-//            reloadMovies("2018-09-10", "2018-09-17", 1, 36, 71)
-//        }, 60000)
-//        Handler().postDelayed({
-//            reloadMovies("2018-09-10", "2018-09-17", 1, 71, 100)
-//        }, 120000)
-
-//        GlobalScope.async {
-//            for (i: Int in 0..100 step 36) {
-//                var rangeTo = if ((i + 35) > 100) 100 else i + 35
-//                reloadMovies("2018-09-10", "2018-09-17", 1, i, rangeTo)
-//                delay(60000)
-//            }
-//        }
     }
-
-
 
     private fun loadNextMovies() {
         var endInd = if (mStartInd + REQUEST_CONT > 100) 100 else mStartInd + REQUEST_CONT
-        reloadMovies("2018-09-10", "2018-09-17", 1, mStartInd, endInd)
+        reloadMovies(getStartDay(), getEndDay(), 1, mStartInd, endInd)
         mStartInd = endInd
     }
 
-    private fun allMoviesLoaded():Boolean {
+    private fun allMoviesLoaded(): Boolean {
         return mStartInd == if (changedMovies == null) true else changedMovies!!.results.size
     }
 
@@ -156,10 +137,34 @@ class MainFragmentViewModel : BaseFragmentViewModel() {
     private fun getNumberOfMovies(): Int {
         return if (mOnMovieListChanged.value == null) {
             0
-        }
-        else {
+        } else {
             mOnMovieListChanged.value!!.size
         }
     }
 
+    fun onLastDaysChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+        if (s.isEmpty()) {
+            return
+        }
+        mStartInd = 0
+        mLastDays.set(s.toString())
+        changedMovies = null
+        onCreate()
+    }
+
+    private fun getStartDay(): String {
+        var today = Date()
+        val cal = Calendar.getInstance()
+        cal.time = today
+        cal.add(Calendar.DATE, -mLastDays.get()?.toInt()!!)
+        val df = SimpleDateFormat(JobInterviewConfig.BASIC_DATE_FORMAT_SERVER)
+        return df.format(cal.time)
+    }
+
+
+    private fun getEndDay(): String {
+        var today = Date()
+        val df = SimpleDateFormat(JobInterviewConfig.BASIC_DATE_FORMAT_SERVER)
+        return df.format(today)
+    }
 }

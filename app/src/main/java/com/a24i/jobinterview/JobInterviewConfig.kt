@@ -10,5 +10,6 @@ object JobInterviewConfig {
     const val MOVIE_DB_IMAGE_SUFFIX = ".jpg"
     const val SERVER_TIMEOUT: Int = 3000
     const val BASIC_DATE_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss"  // Used in PostgreSQL database and as basic string format for java.util.Date.
+    const val BASIC_DATE_FORMAT_SERVER = "yyyy-MM-dd"
     val REPOSITORY = TheMovieDbRepository
 }
