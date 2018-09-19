@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
-	xmlns:android="http://schemas.android.com/apk/res/android">
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto">
 
 	<data>
 
@@ -10,13 +11,36 @@
 	</data>
 
 	<android.support.constraint.ConstraintLayout
-		android:layout_width="match_parent"
-		android:layout_height="match_parent">
+		android:layout_width="150dp"
+		android:layout_height="225dp"
+		android:background="#dedede"
+		android:padding="2dp"
+		android:layout_margin="10dp">
+
+		<android.support.v7.widget.AppCompatImageView
+			android:id="@+id/poster"
+			android:layout_width="0dp"
+			android:layout_height="0dp"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintTop_toTopOf="parent"
+			app:image_url="@{data.poster_path}"
+			android:background="@drawable/ic_photo"
+			/>
 
 		<TextView
-			android:layout_width="match_parent"
+			android:layout_width="0dp"
 			android:layout_height="wrap_content"
-			android:text="@{data.title}"/>
+			app:layout_constraintBottom_toBottomOf="@id/poster"
+			app:layout_constraintEnd_toEndOf="@id/poster"
+			app:layout_constraintStart_toStartOf="@id/poster"
+			android:text="@{data.title}"
+			android:gravity="center_horizontal"
+			android:textSize="18sp"
+			android:textStyle="bold"
+			android:background="#a3ffffff"
+			/>
 
 	</android.support.constraint.ConstraintLayout>
 </layout>

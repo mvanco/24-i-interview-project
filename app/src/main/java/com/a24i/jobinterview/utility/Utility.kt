@@ -14,13 +14,13 @@ object Utility {
      */
     @BindingAdapter("image_url")
     @JvmStatic
-    fun setImageUrl(imageView: ImageView, url: String) {
+    fun setImageUrl(imageView: ImageView, url: String?) {
         loadImage(imageView, R.drawable.ic_photo, url)
     }
 
     @JvmStatic
-    private fun loadImage(imageView: ImageView?, placeholder: Int, url: String) {
-        if (imageView != null && imageView.context != null) {
+    private fun loadImage(imageView: ImageView?, placeholder: Int, url: String?) {
+        if (imageView != null && imageView.context != null && url != null) {
             Glide.with(imageView.context)
                     .load(JobInterviewConfig.MOVIE_DB_IMAGE_BASE_URL + url)
                     .placeholder(placeholder)

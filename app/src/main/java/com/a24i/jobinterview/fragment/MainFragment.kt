@@ -3,16 +3,13 @@ package com.a24i.jobinterview.fragment
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
-import android.support.v4.app.Fragment
 import android.os.Bundle
+import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 
-import com.a24i.jobinterview.R
 import com.a24i.jobinterview.adapter.ChangedMovieAdapter
 import com.a24i.jobinterview.databinding.FragmentMainBinding
 import com.a24i.jobinterview.entity.Movie
@@ -23,6 +20,7 @@ class MainFragment : BaseFragment() {
     private lateinit var mViewModel: MainFragmentViewModel
     private lateinit var mBinding: FragmentMainBinding
     private var mListener: OnFragmentInteractionListener? = null
+    private lateinit var mAdapter: ChangedMovieAdapter
 
     interface OnFragmentInteractionListener: ChangedMovieAdapter.OnItemClickListener
 
@@ -47,12 +45,12 @@ class MainFragment : BaseFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        val layoutManager = LinearLayoutManager(activity)
+        val layoutManager = GridLayoutManager(activity, 2)
         mBinding.movies.layoutManager = layoutManager
-        val adapter = ChangedMovieAdapter(mListener)
-        mBinding.movies.adapter = adapter
-        mViewModel.getItemClickedLiveData().observe(this, Observer<List<Movie>> {
-           adapter.setData(it ?: emptyList())
+        mAdapter = ChangedMovieAdapter(mListener)
+        mBinding.movies.adapter = mAdapter
+        mViewModel.mOnMovieListChanged.observe(this, Observer<List<Movie>> {
+            mAdapter.setData(it ?: emptyList())
         })
     }
 
