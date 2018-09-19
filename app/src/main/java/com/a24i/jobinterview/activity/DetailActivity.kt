@@ -43,7 +43,7 @@ class DetailActivity : BaseActivity() {
         mBinding.viewModel = mViewModel
         setSupportActionBar(mBinding.toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        supportFragmentManager.beginTransaction().add(R.id.fragment_container, DetailFragment.newInstance(mViewModel.movie), TAG_DETAIL_FRAGMENT).commit()
+        supportFragmentManager.beginTransaction().replace(R.id.fragment_container, DetailFragment.newInstance(mViewModel.movie), TAG_DETAIL_FRAGMENT).commit()
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {

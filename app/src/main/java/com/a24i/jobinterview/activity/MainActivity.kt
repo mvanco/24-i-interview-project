@@ -32,7 +32,7 @@ class MainActivity : BaseActivity(), MainFragment.OnFragmentInteractionListener 
         mBinding.viewModel = mViewModel
 
         setSupportActionBar(mBinding.toolbar)
-        supportFragmentManager.beginTransaction().add(R.id.fragment_container, MainFragment.newInstance(), TAG_MAIN_FRAGMENT).commit()
+        supportFragmentManager.beginTransaction().replace(R.id.fragment_container, MainFragment.newInstance(), TAG_MAIN_FRAGMENT).commit()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

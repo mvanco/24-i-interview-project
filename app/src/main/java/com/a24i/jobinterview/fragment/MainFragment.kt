@@ -1,5 +1,6 @@
 package com.a24i.jobinterview.fragment
 
+import android.app.PendingIntent.getActivity
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
@@ -45,8 +46,6 @@ class MainFragment : BaseFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        val layoutManager = GridLayoutManager(activity, 2)
-        mBinding.movies.layoutManager = layoutManager
         mAdapter = ChangedMovieAdapter(mListener)
         mBinding.movies.adapter = mAdapter
         mViewModel.mOnMovieListChanged.observe(this, Observer<List<Movie>> {

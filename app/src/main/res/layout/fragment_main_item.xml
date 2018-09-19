@@ -11,8 +11,8 @@
 	</data>
 
 	<android.support.constraint.ConstraintLayout
-		android:layout_width="150dp"
-		android:layout_height="225dp"
+		android:layout_width="@dimen/fragment_main_item_width"
+		android:layout_height="@dimen/fragment_main_item_height"
 		android:background="#dedede"
 		android:padding="2dp"
 		android:layout_margin="10dp">

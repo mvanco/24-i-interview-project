@@ -25,13 +25,9 @@
 				android:id="@+id/poster"
 				android:layout_width="0dp"
 				android:layout_height="wrap_content"
-				android:layout_marginEnd="8dp"
-				android:layout_marginLeft="8dp"
-				android:layout_marginRight="8dp"
-				android:layout_marginStart="8dp"
 				android:src="@drawable/ic_photo"
+				android:background="#cacaca"
 				app:image_url="@{viewModel.movie.poster_path}"
-				app:layout_constraintDimensionRatio="H,3:4"
 				app:layout_constraintEnd_toEndOf="parent"
 				app:layout_constraintStart_toStartOf="parent"
 				app:layout_constraintTop_toTopOf="parent"/>
@@ -44,7 +40,6 @@
 				android:layout_marginStart="32dp"
 				android:layout_marginRight="32dp"
 				android:layout_marginTop="16dp"
-
 				android:text="@{viewModel.movie.title}"
 				android:textSize="24sp"
 				app:layout_constraintLeft_toLeftOf="parent"

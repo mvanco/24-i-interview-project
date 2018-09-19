@@ -1,10 +1,8 @@
-package com.a24i.jobinterview.utility
+package com.a24i.jobinterview
 
 import android.databinding.BindingAdapter
 import android.widget.ImageView
-import com.a24i.jobinterview.JobInterviewConfig
 
-import com.a24i.jobinterview.R
 import com.bumptech.glide.Glide
 
 object Utility {
