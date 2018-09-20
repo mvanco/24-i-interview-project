@@ -2,8 +2,8 @@ package com.a24i.jobinterview
 
 import android.databinding.BindingAdapter
 import android.widget.ImageView
-
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 
 object Utility {
 
@@ -16,28 +16,17 @@ object Utility {
         loadImage(imageView, R.drawable.ic_photo, url)
     }
 
+
     @JvmStatic
     private fun loadImage(imageView: ImageView?, placeholder: Int, url: String?) {
         if (imageView != null && imageView.context != null && url != null) {
             Glide.with(imageView.context)
                     .load(JobInterviewConfig.MOVIE_DB_IMAGE_BASE_URL + url)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .placeholder(placeholder)
-                    //					.listener(new RequestListener<String, GlideDrawable>()
-                    //					{
-                    //						@Override
-                    //						public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource)
-                    //						{
-                    //							return false;
-                    //						}
-                    //
-                    //
-                    //						@Override
-                    //						public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource)
-                    //						{
-                    //							return false;
-                    //						}
-                    //					})
                     .into(imageView)
+        } else {
+            Glide.clear(imageView)
         }
     }
 }

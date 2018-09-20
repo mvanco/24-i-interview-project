@@ -76,7 +76,6 @@ class JIRetrofitClient {
          */
         private fun createConverterFactory(): Converter.Factory {
             val builder = GsonBuilder()
-            builder.setDateFormat(JobInterviewConfig.BASIC_DATE_FORMAT_STRING)
             val gson = builder.create()
             return GsonConverterFactory.create(gson)
         }

@@ -3,7 +3,7 @@ package com.a24i.jobinterview.api
 data class MovieApi(
         val adult: Boolean,
         val backdrop_path: String?,
-        val belongs_to_collection: Boolean?,
+        val belongs_to_collection: CollectionApi?,
         val budget: Int,
         val genres: List<GenreApi>,
         val homepage: String?,

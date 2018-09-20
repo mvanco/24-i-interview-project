@@ -1,19 +1,18 @@
 package com.a24i.jobinterview.fragment
 
-import android.app.PendingIntent.getActivity
-import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
+import android.content.Context.INPUT_METHOD_SERVICE
 import android.os.Bundle
-import android.support.v7.widget.GridLayoutManager
-import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
+import android.widget.TextView
 
 import com.a24i.jobinterview.adapter.ChangedMovieAdapter
 import com.a24i.jobinterview.databinding.FragmentMainBinding
-import com.a24i.jobinterview.entity.Movie
 import com.a24i.jobinterview.viewmodel.MainFragmentViewModel
 
 class MainFragment : BaseFragment() {
@@ -41,6 +40,20 @@ class MainFragment : BaseFragment() {
                               savedInstanceState: Bundle?): View? {
         mBinding = FragmentMainBinding.inflate(inflater, container, false)
         mBinding.viewModel = mViewModel
+        mBinding.lastDays.setOnEditorActionListener { v, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                v.clearFocus()
+                val imm = v.context.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(v.windowToken, 0)
+                true
+            }
+            false
+        }
+        mBinding.lastDays.setOnFocusChangeListener { v, hasFocus ->
+            if (hasFocus) {
+                (v as TextView).text = ""
+            }
+        }
         return mBinding.root
     }
 
@@ -48,9 +61,7 @@ class MainFragment : BaseFragment() {
         super.onActivityCreated(savedInstanceState)
         mAdapter = ChangedMovieAdapter(mListener)
         mBinding.movies.adapter = mAdapter
-        mViewModel.mOnMovieListChanged.observe(this, Observer<List<Movie>> {
-            mAdapter.setData(it ?: emptyList())
-        })
+        mViewModel.setupBindableAdapter(mAdapter)
     }
 
     override fun onAttach(context: Context?) {

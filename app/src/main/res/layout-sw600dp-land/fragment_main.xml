@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -8,13 +7,14 @@
 
         <variable
             name="viewModel"
-            type="com.a24i.jobinterview.viewmodel.MainFragmentViewModel"/>
+            type="com.a24i.jobinterview.viewmodel.MainFragmentViewModel" />
     </data>
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/root_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:focusableInTouchMode="true"
         tools:context=".fragment.MainFragment"
         tools:showIn="@layout/activity_main">
 
@@ -25,9 +25,9 @@
             android:layout_marginLeft="32dp"
             android:layout_marginTop="32dp"
             android:text="In last"
-            android:textSize="32sp"
+            android:textSize="@dimen/in_last_text_size"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
             android:id="@+id/last_days"
@@ -36,25 +36,30 @@
             android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
             android:ems="1"
+            android:imeOptions="actionDone"
             android:inputType="numberDecimal"
             android:maxLength="1"
-            android:text="@{viewModel.MLastDays}"
-            android:textSize="32sp"
             android:onTextChanged="@{(s, start, before, count) -> viewModel.onLastDaysChanged(s, start, before, count)}"
+            android:singleLine="true"
+            android:text="@{viewModel.MLastDays}"
+            android:textSize="@dimen/in_last_text_size"
             app:layout_constraintBaseline_toBaselineOf="@+id/in_last"
-            app:layout_constraintStart_toEndOf="@+id/in_last"/>
+            app:layout_constraintStart_toEndOf="@+id/in_last" />
 
         <TextView
-            android:clickable="true"
             android:id="@+id/days"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="days"
             android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
-            android:textSize="32sp"
+            android:clickable="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:focusedByDefault="true"
+            android:text="days"
+            android:textSize="@dimen/in_last_text_size"
             app:layout_constraintBaseline_toBaselineOf="@+id/in_last"
-            app:layout_constraintStart_toEndOf="@+id/last_days"/>
+            app:layout_constraintStart_toEndOf="@+id/last_days" />
 
 
         <android.support.v7.widget.RecyclerView
@@ -66,34 +71,76 @@
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
             android:layout_marginStart="8dp"
-            app:layoutManager="android.support.v7.widget.GridLayoutManager"
             android:orientation="horizontal"
-            app:spanCount="2"
+            app:layoutManager="android.support.v7.widget.GridLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/last_days"/>
+            app:layout_constraintTop_toBottomOf="@+id/last_days"
+            app:spanCount="1" />
 
-        <!--<android.support.v7.widget.AppCompatImageView-->
-            <!--android:id="@+id/imageView"-->
-            <!--android:layout_width="@dimen/page_navigation_icon_width"-->
-            <!--android:layout_height="@dimen/page_navigation_icon_height"-->
-            <!--android:layout_marginEnd="8dp"-->
-            <!--android:layout_marginRight="8dp"-->
-            <!--app:layout_constraintEnd_toStartOf="@+id/imageView2"-->
-            <!--app:layout_constraintTop_toTopOf="@+id/imageView2"-->
-            <!--app:srcCompat="@drawable/ic_previous_page"/>-->
+        <android.support.v7.widget.AppCompatImageView
+            android:id="@+id/imageView"
+            android:layout_width="@dimen/page_navigation_icon_width"
+            android:layout_height="@dimen/page_navigation_icon_height"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:onClick="@{() -> viewModel.onPreviousPageClicked()}"
+            app:layout_constraintEnd_toStartOf="@+id/imageView2"
+            app:layout_constraintTop_toTopOf="@+id/imageView2"
+            app:srcCompat="@drawable/ic_previous_page" />
 
-        <!--<android.support.v7.widget.AppCompatImageView-->
-            <!--android:id="@+id/imageView2"-->
-            <!--android:layout_width="@dimen/page_navigation_icon_width"-->
-            <!--android:layout_height="@dimen/page_navigation_icon_height"-->
-            <!--android:layout_marginEnd="32dp"-->
-            <!--android:layout_marginRight="32dp"-->
-            <!--android:layout_marginTop="32dp"-->
-            <!--app:layout_constraintEnd_toEndOf="parent"-->
-            <!--app:layout_constraintTop_toTopOf="parent"-->
-            <!--app:srcCompat="@drawable/ic_next_page"/>-->
+        <android.support.v7.widget.AppCompatImageView
+            android:id="@+id/imageView2"
+            android:layout_width="@dimen/page_navigation_icon_width"
+            android:layout_height="@dimen/page_navigation_icon_height"
+            android:layout_marginEnd="32dp"
+            android:layout_marginRight="32dp"
+            android:layout_marginTop="32dp"
+            android:onClick="@{() -> viewModel.onNextPageClicked()}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_next_page" />
+
+        <!--<View-->
+            <!--android:id="@+id/background"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="0dp"-->
+            <!--android:background="#00000000"-->
+            <!--android:visibility="@{viewModel.MLoaderShown}"-->
+            <!--app:layout_constraintBottom_toBottomOf="@id/progress_bar"-->
+            <!--app:layout_constraintEnd_toEndOf="@id/progress_bar"-->
+            <!--app:layout_constraintHorizontal_bias="0.015"-->
+            <!--app:layout_constraintStart_toStartOf="@id/progress_bar"-->
+            <!--app:layout_constraintTop_toTopOf="@id/progress_bar" />-->
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="@dimen/progress_bar_width"
+            android:layout_height="@dimen/progress_bar_height"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:indeterminate="true"
+            android:visibility="@{viewModel.MLoaderShown}"
+            app:layout_constraintEnd_toStartOf="@+id/imageView"
+            app:layout_constraintTop_toTopOf="@+id/imageView2" />
+
+        <ProgressBar
+            android:id="@+id/big_progress_bar"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="64dp"
+            android:layout_marginEnd="64dp"
+            android:layout_marginLeft="64dp"
+            android:layout_marginRight="64dp"
+            android:layout_marginStart="64dp"
+            android:layout_marginTop="64dp"
+            android:indeterminate="true"
+            android:visibility="@{viewModel.MBigLoaderShown}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/last_days" />
 
     </android.support.constraint.ConstraintLayout>
 </layout>

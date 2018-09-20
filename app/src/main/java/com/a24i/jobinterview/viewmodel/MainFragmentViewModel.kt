@@ -3,130 +3,52 @@ package com.a24i.jobinterview.viewmodel
 import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.OnLifecycleEvent
-import android.databinding.ObservableField
+import android.databinding.*
+import android.databinding.Observable
+import android.os.Handler
 import android.util.Log
+import android.view.View
 import com.a24i.jobinterview.JobInterviewConfig
+import com.a24i.jobinterview.adapter.OnLoadMoreListener
+import com.a24i.jobinterview.adapter.ProgressiveBindableAdapter
 import com.a24i.jobinterview.api.ChangedMoviesApi
 import com.a24i.jobinterview.api.MovieApi
-import com.a24i.jobinterview.entity.Movie
+import com.a24i.jobinterview.entity.*
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.Main
-import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
-class MainFragmentViewModel : BaseFragmentViewModel() {
-
+class MainFragmentViewModel : BaseFragmentViewModel(), OnLoadMoreListener {
     val mOnMovieListChanged: MutableLiveData<List<Movie>> = MutableLiveData()
     val mLastDays = ObservableField("3")
+    val mLoaderShown = ObservableInt(View.INVISIBLE)
+    val mBigLoaderShown = ObservableInt(View.INVISIBLE)
+    private lateinit  var mBindableAdapter: ProgressiveBindableAdapter<Movie>
+
+
     private var reloadMoviesJob: Job? = null
     private var changedMovies: ChangedMoviesApi? = null
     private var mStartInd: Int = 0
-
-    companion object {
-        private const val REQUEST_CONT = 30  // How many requests are allowed in small interval.
-    }
+    private var mPage = 1
 
     init {
         mOnMovieListChanged.value = emptyList()
     }
 
+    /**
+     * Initialize two-way communication between ViewModel and Adapter
+     */
+    fun setupBindableAdapter(adapter: ProgressiveBindableAdapter<Movie>) {
+        mBindableAdapter = adapter
+        mBindableAdapter.setOnLoadMoreListener(this)
+    }
+
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-    fun onCreate() {
-        GlobalScope.launch {
-            loadNextMovies()
-            while (!allMoviesLoaded()) {
-                delay(15000)
-                loadNextMovies()
-            }
+    fun onResume() {
+        if (changedMovies == null) {
+            startNewLoading()
         }
-    }
-
-    private fun loadNextMovies() {
-        var endInd = if (mStartInd + REQUEST_CONT > 100) 100 else mStartInd + REQUEST_CONT
-        reloadMovies(getStartDay(), getEndDay(), 1, mStartInd, endInd)
-        mStartInd = endInd
-    }
-
-    private fun allMoviesLoaded(): Boolean {
-        return mStartInd == if (changedMovies == null) true else changedMovies!!.results.size
-    }
-
-    private fun clearChangedMovies() {
-        changedMovies = null
-    }
-
-    private fun reloadMovies(startDate: String, endDate: String, page: Int, fromInd: Int = 0, toInd: Int = -1) {
-        reloadMoviesJob = GlobalScope.async(Dispatchers.IO, CoroutineStart.DEFAULT, null, {
-
-            if (changedMovies == null) {
-                for (i in 1..3) {  // Try 3 times.
-                    val changedMoviesDef: Deferred<ChangedMoviesApi> = JobInterviewConfig.REPOSITORY.getChangedMovies(startDate, endDate, page)
-                    try {
-                        changedMovies = changedMoviesDef.await()
-                    } catch (e: Exception) {
-                    } finally {
-                        if (changedMovies != null) {
-                            break
-                        }
-                    }
-                }
-            }
-
-            if (changedMovies == null) {
-                return@async  // Shoud invoke Toast message that sever is unavailable.
-            }
-
-            val compToInd = if (toInd == -1) changedMovies!!.results.size else toInd
-            val results = changedMovies!!.results.subList(fromInd, compToInd)
-            val resultList = results.map {
-                GlobalScope.async(Dispatchers.IO) {
-                    var deferred: Deferred<MovieApi>? = null
-                    attempts@ for (i in 1..1) {
-                        Log.d("cor", "trying $i attempt with id ${it.id}")
-                        deferred = JobInterviewConfig.REPOSITORY.getMovie(it.id)
-                        while (deferred.isActive) {
-                            delay(10)
-                        }
-                        if (!deferred?.isCompletedExceptionally) {
-                            break@attempts
-                        }
-                        delay(2000)
-                    }
-                    deferred
-                }
-            }
-
-            while (!resultList.all { !it.isActive }) {
-                Log.d("cor", "still wating to finish from range ($fromInd-$toInd)")
-                delay(10)
-            }
-
-            val movies = resultList.filter { !it.isCompletedExceptionally }.map {
-                it.getCompleted()
-            }.filter {
-                !(it == null || it.isCompletedExceptionally)
-            }.map {
-                it?.getCompleted()
-            }.filter {
-                it != null
-            }.map {
-                Movie(it!!)
-            }
-
-            withContext(Dispatchers.Main) {
-                Log.d("cor", "all should be ready now from range ($fromInd-$toInd)")
-                if (toInd != -1) {
-                    var newList = mutableListOf<Movie>()
-                    newList.addAll(mOnMovieListChanged.value!!)
-                    newList.addAll(movies)
-                    mOnMovieListChanged.value = newList
-                } else if ((mOnMovieListChanged.value == null)
-                        || (mOnMovieListChanged.value != null && mOnMovieListChanged.value != movies)) {
-                    mOnMovieListChanged.value = movies
-                }
-            }
-        })
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
@@ -134,23 +56,159 @@ class MainFragmentViewModel : BaseFragmentViewModel() {
         reloadMoviesJob?.cancel()
     }
 
-    private fun getNumberOfMovies(): Int {
-        return if (mOnMovieListChanged.value == null) {
-            0
-        } else {
-            mOnMovieListChanged.value!!.size
-        }
-    }
-
+    // Binded.
     fun onLastDaysChanged(s: CharSequence, start: Int, before: Int, count: Int) {
         if (s.isEmpty()) {
             return
         }
-        mStartInd = 0
         mLastDays.set(s.toString())
-        changedMovies = null
-        onCreate()
+        startNewLoading()
     }
+
+    // Binded.
+    fun onPreviousPageClicked() {
+        if (mPage > 1) {
+            mPage--
+        }
+        startNewLoading()
+    }
+
+    // Binded.
+    fun onNextPageClicked() {
+        changedMovies?.let {
+            if (mPage < changedMovies!!.total_pages) {
+                mPage++
+            }
+            startNewLoading()
+        }
+    }
+
+    override fun onLoadMore() {
+        startLoading()
+    }
+
+
+    private fun startLoading() {
+        if (isLoading()) {
+            return
+        }
+        Log.d("cor", "started loading")
+
+
+        showLoader()
+        mBindableAdapter.showLoader()
+
+        GlobalScope.launch {
+            var endInd = if (mStartInd + JobInterviewConfig.SIMULTANEOUS_REQUEST_COUNT > 100) 100 else mStartInd + JobInterviewConfig.SIMULTANEOUS_REQUEST_COUNT
+            reloadMoviesJob = GlobalScope.async(Dispatchers.IO, CoroutineStart.DEFAULT, null, {
+
+                if (changedMovies == null) {
+                    mBindableAdapter.clearData()
+                    for (i in 1..3) {  // Try 3 times.
+                        val changedMoviesDef: Deferred<ChangedMoviesApi> = JobInterviewConfig.REPOSITORY.getChangedMovies(getStartDay(), getEndDay(), mPage)
+                        try {
+                            changedMovies = changedMoviesDef.await()
+                        } catch (e: Exception) {
+                        } finally {
+                            if (changedMovies != null) {
+                                break
+                            }
+                        }
+                    }
+                }
+
+                if (changedMovies == null) {
+                    return@async  // Shoud invoke Toast message that sever is unavailable.
+                }
+
+                val compToInd = if (endInd == -1) changedMovies!!.results.size else endInd
+                val results = changedMovies!!.results.subList(mStartInd, compToInd)
+                val resultList = results.map {
+                    GlobalScope.async(Dispatchers.IO) {
+                        var deferred: Deferred<MovieApi>? = null
+                        attempts@ for (i in 1..3) {
+                            deferred = JobInterviewConfig.REPOSITORY.getMovie(it.id)
+                            while (deferred.isActive) {
+                                delay(10)
+                            }
+                            if (!deferred?.isCompletedExceptionally) {
+                                break@attempts
+                            }
+                            delay(2000)
+                        }
+                        deferred
+                    }
+                }
+
+                while (!resultList.all { !it.isActive }) {
+                    delay(250)
+                }
+
+                val movies = resultList.filter { !it.isCompletedExceptionally }
+
+                .map {
+                    it.getCompleted()
+                }
+
+                .filter {
+                    !(it == null || it.isCompletedExceptionally)
+                }
+
+                .map {
+                    it?.getCompleted()
+                }
+
+                .filter {
+                    it != null
+                }
+
+                .map {
+                    Movie().copy(
+                            overview = it!!.overview,
+                            poster_path = it!!.poster_path,
+                            title = it!!.title
+                    )
+                }
+
+                GlobalScope.async(Dispatchers.Main) {
+                    hideLoader()
+                    mBindableAdapter.hideLoader()
+                    mBindableAdapter?.addData(movies)
+                    mStartInd = endInd
+                }
+            })
+        }
+    }
+
+    private fun showLoader() {
+        if (changedMovies == null) {
+            mBigLoaderShown.set(View.VISIBLE)
+            mLoaderShown.set(View.INVISIBLE)
+        }
+        else {
+            mBigLoaderShown.set(View.INVISIBLE)
+            mLoaderShown.set(View.VISIBLE)
+        }
+    }
+
+
+    private fun hideLoader() {
+        mBigLoaderShown.set(View.INVISIBLE)
+        mLoaderShown.set(View.INVISIBLE)
+    }
+
+    private fun isLoading(): Boolean {
+        return (mBigLoaderShown.get() == View.VISIBLE) || (mLoaderShown.get() == View.VISIBLE)
+    }
+
+
+    private fun startNewLoading() {
+        mStartInd = 0
+        changedMovies = null
+
+        startLoading()
+    }
+
 
     private fun getStartDay(): String {
         var today = Date()

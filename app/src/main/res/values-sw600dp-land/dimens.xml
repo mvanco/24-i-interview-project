@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="fragment_main_item_width">100dp</dimen>
-    <dimen name="fragment_main_item_height">150dp</dimen>
+    <dimen name="fragment_main_item_width">250dp</dimen>
+    <dimen name="fragment_main_item_height">375dp</dimen>
     <dimen name="page_navigation_icon_width">48dp</dimen>
     <dimen name="page_navigation_icon_height">48dp</dimen>
+    <dimen name="in_last_text_size">32sp</dimen>
+    <dimen name="progress_bar_width">48dp</dimen>
+    <dimen name="progress_bar_height">48dp</dimen>
 </resources>
