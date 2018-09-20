@@ -4,11 +4,10 @@ import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.OnLifecycleEvent
 import android.databinding.*
-import android.databinding.Observable
-import android.os.Handler
-import android.util.Log
 import android.view.View
 import com.a24i.jobinterview.JobInterviewConfig
+import com.a24i.jobinterview.JobInterviewConfig.LAST_DAYS_DEFAULT
+import com.a24i.jobinterview.JobInterviewConfig.SERVER_ATTEMPTS
 import com.a24i.jobinterview.adapter.OnLoadMoreListener
 import com.a24i.jobinterview.adapter.ProgressiveBindableAdapter
 import com.a24i.jobinterview.api.ChangedMoviesApi
@@ -21,12 +20,10 @@ import java.util.*
 
 class MainFragmentViewModel : BaseFragmentViewModel(), OnLoadMoreListener {
     val mOnMovieListChanged: MutableLiveData<List<Movie>> = MutableLiveData()
-    val mLastDays = ObservableField("3")
+    val mLastDays = ObservableField(LAST_DAYS_DEFAULT)
     val mLoaderShown = ObservableInt(View.INVISIBLE)
     val mBigLoaderShown = ObservableInt(View.INVISIBLE)
     private lateinit  var mBindableAdapter: ProgressiveBindableAdapter<Movie>
-
-
     private var reloadMoviesJob: Job? = null
     private var changedMovies: ChangedMoviesApi? = null
     private var mStartInd: Int = 0
@@ -34,14 +31,6 @@ class MainFragmentViewModel : BaseFragmentViewModel(), OnLoadMoreListener {
 
     init {
         mOnMovieListChanged.value = emptyList()
-    }
-
-    /**
-     * Initialize two-way communication between ViewModel and Adapter
-     */
-    fun setupBindableAdapter(adapter: ProgressiveBindableAdapter<Movie>) {
-        mBindableAdapter = adapter
-        mBindableAdapter.setOnLoadMoreListener(this)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
@@ -56,7 +45,10 @@ class MainFragmentViewModel : BaseFragmentViewModel(), OnLoadMoreListener {
         reloadMoviesJob?.cancel()
     }
 
-    // Binded.
+    override fun onLoadMore() {
+        startLoading()
+    }
+
     fun onLastDaysChanged(s: CharSequence, start: Int, before: Int, count: Int) {
         if (s.isEmpty()) {
             return
@@ -65,7 +57,6 @@ class MainFragmentViewModel : BaseFragmentViewModel(), OnLoadMoreListener {
         startNewLoading()
     }
 
-    // Binded.
     fun onPreviousPageClicked() {
         if (mPage > 1) {
             mPage--
@@ -73,7 +64,6 @@ class MainFragmentViewModel : BaseFragmentViewModel(), OnLoadMoreListener {
         startNewLoading()
     }
 
-    // Binded.
     fun onNextPageClicked() {
         changedMovies?.let {
             if (mPage < changedMovies!!.total_pages) {
@@ -83,17 +73,25 @@ class MainFragmentViewModel : BaseFragmentViewModel(), OnLoadMoreListener {
         }
     }
 
-    override fun onLoadMore() {
-        startLoading()
+    /**
+     * Initialize two-way communication between ViewModel and Adapter
+     */
+    fun setupBindableAdapter(adapter: ProgressiveBindableAdapter<Movie>) {
+        mBindableAdapter = adapter
+        mBindableAdapter.setOnLoadMoreListener(this)
     }
 
+    private fun startNewLoading() {
+        mStartInd = 0
+        changedMovies = null
+
+        startLoading()
+    }
 
     private fun startLoading() {
         if (isLoading()) {
             return
         }
-        Log.d("cor", "started loading")
-
 
         showLoader()
         mBindableAdapter.showLoader()
@@ -104,7 +102,7 @@ class MainFragmentViewModel : BaseFragmentViewModel(), OnLoadMoreListener {
 
                 if (changedMovies == null) {
                     mBindableAdapter.clearData()
-                    for (i in 1..3) {  // Try 3 times.
+                    for (i in 1..SERVER_ATTEMPTS) {  // Try 3 times.
                         val changedMoviesDef: Deferred<ChangedMoviesApi> = JobInterviewConfig.REPOSITORY.getChangedMovies(getStartDay(), getEndDay(), mPage)
                         try {
                             changedMovies = changedMoviesDef.await()
@@ -126,7 +124,7 @@ class MainFragmentViewModel : BaseFragmentViewModel(), OnLoadMoreListener {
                 val resultList = results.map {
                     GlobalScope.async(Dispatchers.IO) {
                         var deferred: Deferred<MovieApi>? = null
-                        attempts@ for (i in 1..3) {
+                        attempts@ for (i in 1..SERVER_ATTEMPTS) {
                             deferred = JobInterviewConfig.REPOSITORY.getMovie(it.id)
                             while (deferred.isActive) {
                                 delay(10)
@@ -191,7 +189,6 @@ class MainFragmentViewModel : BaseFragmentViewModel(), OnLoadMoreListener {
         }
     }
 
-
     private fun hideLoader() {
         mBigLoaderShown.set(View.INVISIBLE)
         mLoaderShown.set(View.INVISIBLE)
@@ -201,15 +198,6 @@ class MainFragmentViewModel : BaseFragmentViewModel(), OnLoadMoreListener {
         return (mBigLoaderShown.get() == View.VISIBLE) || (mLoaderShown.get() == View.VISIBLE)
     }
 
-
-    private fun startNewLoading() {
-        mStartInd = 0
-        changedMovies = null
-
-        startLoading()
-    }
-
-
     private fun getStartDay(): String {
         var today = Date()
         val cal = Calendar.getInstance()
@@ -218,7 +206,6 @@ class MainFragmentViewModel : BaseFragmentViewModel(), OnLoadMoreListener {
         val df = SimpleDateFormat(JobInterviewConfig.BASIC_DATE_FORMAT_SERVER)
         return df.format(cal.time)
     }
-
 
     private fun getEndDay(): String {
         var today = Date()

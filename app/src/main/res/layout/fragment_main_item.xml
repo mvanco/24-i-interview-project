@@ -18,7 +18,7 @@
 		android:layout_margin="10dp">
 
 		<android.support.v7.widget.AppCompatImageView
-			android:id="@+id/poster"
+			android:id="@+id/iv_poster"
 			android:layout_width="0dp"
 			android:layout_height="0dp"
 			app:layout_constraintStart_toStartOf="parent"
@@ -32,9 +32,9 @@
 		<TextView
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
-			app:layout_constraintBottom_toBottomOf="@id/poster"
-			app:layout_constraintEnd_toEndOf="@id/poster"
-			app:layout_constraintStart_toStartOf="@id/poster"
+			app:layout_constraintBottom_toBottomOf="@id/iv_poster"
+			app:layout_constraintEnd_toEndOf="@id/iv_poster"
+			app:layout_constraintStart_toStartOf="@id/iv_poster"
 			android:text="@{data.title}"
 			android:gravity="center_horizontal"
 			android:textSize="18sp"

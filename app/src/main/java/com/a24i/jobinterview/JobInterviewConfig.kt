@@ -11,7 +11,8 @@ object JobInterviewConfig {
     const val BASIC_DATE_FORMAT_SERVER = "yyyy-MM-dd"
     const val SIMULTANEOUS_REQUEST_COUNT = 10
     const val LOAD_MORE_OFFSET = 2
-
+    const val LAST_DAYS_DEFAULT = "3"
+    const val SERVER_ATTEMPTS = 3
 
     val REPOSITORY = TheMovieDbRepository
 }

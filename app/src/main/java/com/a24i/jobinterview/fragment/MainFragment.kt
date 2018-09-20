@@ -40,27 +40,32 @@ class MainFragment : BaseFragment() {
                               savedInstanceState: Bundle?): View? {
         mBinding = FragmentMainBinding.inflate(inflater, container, false)
         mBinding.viewModel = mViewModel
-        mBinding.lastDays.setOnEditorActionListener { v, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                v.clearFocus()
-                val imm = v.context.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.hideSoftInputFromWindow(v.windowToken, 0)
-                true
+
+        mBinding.edLastDays.apply {
+            setOnEditorActionListener { v, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    v.clearFocus()
+                    val imm = v.context.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.hideSoftInputFromWindow(v.windowToken, 0)
+                    true
+                }
+                false
             }
-            false
-        }
-        mBinding.lastDays.setOnFocusChangeListener { v, hasFocus ->
-            if (hasFocus) {
-                (v as TextView).text = ""
+
+            setOnFocusChangeListener { v, hasFocus ->
+                if (hasFocus) {
+                    (v as TextView).text = ""
+                }
             }
         }
+
         return mBinding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         mAdapter = ChangedMovieAdapter(mListener)
-        mBinding.movies.adapter = mAdapter
+        mBinding.recycler.adapter = mAdapter
         mViewModel.setupBindableAdapter(mAdapter)
     }
 
@@ -78,7 +83,5 @@ class MainFragment : BaseFragment() {
         super.onDetach()
         mListener = null
     }
-
-
 
 }

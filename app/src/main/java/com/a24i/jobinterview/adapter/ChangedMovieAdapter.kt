@@ -3,7 +3,6 @@ package com.a24i.jobinterview.adapter
 import android.databinding.ViewDataBinding
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.a24i.jobinterview.JobInterviewConfig
@@ -17,23 +16,27 @@ import kotlinx.coroutines.experimental.android.Main
 import kotlinx.coroutines.experimental.launch
 
 class ChangedMovieAdapter(private val mListener: OnItemClickListener?) : RecyclerView.Adapter<ChangedMovieAdapter.ViewHolder>(), ProgressiveBindableAdapter<Movie> {
-    private lateinit var mRecyclerView: RecyclerView
+    val ITEM_VIEW_TYPE_MOVIE: Int = 0
+    val ITEM_VIEW_TYPE_LOADER: Int = 1
 
+    private lateinit var mRecyclerView: RecyclerView
     private var isLoading = false
     private var onLoadMoreListener: OnLoadMoreListener? = null
-    val ITEM_VIEW_TYPE_MOVIE: Int = 0
 
-    val ITEM_VIEW_TYPE_LOADER: Int = 1
-    override fun getItemViewType(position: Int): Int {
-        return when (mMovies[position]) {
-            null -> ITEM_VIEW_TYPE_LOADER
-            else -> ITEM_VIEW_TYPE_MOVIE
-        }
+    override fun setOnLoadMoreListener(listener: OnLoadMoreListener) {
+        onLoadMoreListener = listener
     }
 
     override fun setData(data: List<Movie>) {
         clearData()
         addData(data)
+    }
+
+    override fun clearData() {
+        isLoading = false
+        var itemCount = mMovies.size
+        mMovies.clear()
+        notifyItemRangeRemoved(0, itemCount)
     }
 
     override fun addData(data: List<Movie>) {
@@ -57,25 +60,21 @@ class ChangedMovieAdapter(private val mListener: OnItemClickListener?) : Recycle
         }
     }
 
-    override fun setOnLoadMoreListener(listener: OnLoadMoreListener) {
-        onLoadMoreListener = listener
-    }
-
-    override fun clearData() {
-        isLoading = false
-        var itemCount = mMovies.size
-        mMovies.clear()
-        notifyItemRangeRemoved(0, itemCount)
-    }
-
     private fun isLoaderShown(): Boolean {
         return mMovies.size > 1 && mMovies[mMovies.size - 1] == null
     }
 
-    private val mMovies: MutableList<Movie?> = mutableListOf<Movie?>()
+    private val mMovies: MutableList<Movie?> = mutableListOf()
 
     interface OnItemClickListener {
         fun onMovieSelected(movie: Movie)
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return when (mMovies[position]) {
+            null -> ITEM_VIEW_TYPE_LOADER
+            else -> ITEM_VIEW_TYPE_MOVIE
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
